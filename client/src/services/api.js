@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const API = axios.create({
-  baseURL: "http://localhost:5000/api/blogs",
+  baseURL: "https://blog-app-0a94.onrender.com/api/blogs",
 });
 
 API.interceptors.request.use((req) => {
