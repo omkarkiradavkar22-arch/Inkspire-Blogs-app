@@ -26,7 +26,7 @@ function BlogDetails() {
   const currentUserId = currentUser?._id || currentUser?.id;
   const isLoggedIn = !!localStorage.getItem("token");
 
-  // ✅ Fetch Blog
+  //  Fetch Blog
   useEffect(() => {
     const fetchBlog = async () => {
       try {
