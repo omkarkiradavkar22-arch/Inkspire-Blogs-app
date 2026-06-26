@@ -14,6 +14,10 @@ export default defineConfig({
         name: 'Blog Platform app',
         short_name: 'Blog',
         theme_color: '#ffffff',
+        display:'standalone',
+         start_url: '/',
+          scope: '/',
+
         icons: [
           {
             src: '/small.png',

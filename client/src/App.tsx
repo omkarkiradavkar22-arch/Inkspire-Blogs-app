@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState,lazy, Suspense } from "react";
 import {
   Twitter,
   CircleDot,
@@ -70,6 +70,7 @@ function App() {
   };
 
   return (
+    <Suspense fallback={<div>loading....</div>}>
     <div className="min-h-screen bg-white p-3 sm:p-4 md:p-6">
       {/* Main Card */}
       <div className="relative rounded-2xl sm:rounded-3xl overflow-hidden min-h-[calc(100vh-24px)] sm:min-h-[calc(100vh-32px)] md:min-h-[calc(100vh-48px)] lg:h-[calc(100vh-48px)]">
@@ -293,6 +294,7 @@ function App() {
         </div>
       </div>
     </div>
+    </Suspense>
   );
 }
 
