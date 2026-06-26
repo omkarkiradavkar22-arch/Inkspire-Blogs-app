@@ -78,7 +78,7 @@ function BlogDetails() {
     }
   }, []);
 
-  // ✅ Fetch Comments
+  // Fetch Comments
   const fetchComments = async () => {
     try {
       const res = await axios.get(
