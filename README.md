@@ -83,7 +83,7 @@ This project was built to provide a complete blogging platform where users can s
 
 ## 👨‍💻 Author
 
-Omkar Kiradavkar
+Omkar Kirdavkar
 
 ## 📄 License
 
