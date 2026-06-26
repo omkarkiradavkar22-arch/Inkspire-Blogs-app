@@ -210,7 +210,7 @@ function BlogDetails() {
     }
   };
 
-  // ✅ ReplyItem Component - सगळ्यांना reply द्या
+  // ✅ ReplyItem Component
   const ReplyItem = ({ reply, isBlogOwner }) => {
     const [showReplyInput, setShowReplyInput] = useState(false);
     const [localReplyText, setLocalReplyText] = useState("");
