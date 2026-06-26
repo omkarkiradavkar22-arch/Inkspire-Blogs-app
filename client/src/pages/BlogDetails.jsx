@@ -49,7 +49,7 @@ function BlogDetails() {
     fetchComments();
   }, [id]);
 
-  // ✅ Scroll to comment
+  //  Scroll to comment
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const commentId = params.get("comment");
