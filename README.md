@@ -85,6 +85,6 @@ This project was built to provide a complete blogging platform where users can s
 
 Omkar Kirdavkar
 
-## 📄 License
+## 🌟 Support
 
-This project is licensed under the MIT License.
+If you like this project, give it a ⭐ on GitHub.
