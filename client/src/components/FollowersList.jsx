@@ -12,8 +12,8 @@ function FollowersList({ userId, type, onClose }) {
       try {
         const token = localStorage.getItem("token");
         const endpoint = type === "followers" 
-          ? `http://localhost:5000/api/follow/${userId}/followers`
-          : `http://localhost:5000/api/follow/${userId}/following`;
+          ? `https://inkspire-blogs-app1.onrender.com/api/follow/${userId}/followers`
+          : `https://inkspire-blogs-app1.onrender.com/api/follow/${userId}/following`;
 
         const res = await axios.get(endpoint, {
           headers: { Authorization: `Bearer ${token}` },
@@ -117,7 +117,7 @@ function FollowersList({ userId, type, onClose }) {
               <img
                 src={
                   user.profilePic
-                    ? `http://localhost:5000${user.profilePic}`
+                    ? `https://inkspire-blogs-app1.onrender.com${user.profilePic}`
                     : "https://ui-avatars.com/api/?name=User&background=4a6cf7&color=fff&size=40"
                 }
                 alt={user.username}
