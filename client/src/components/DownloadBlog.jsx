@@ -14,7 +14,7 @@ function DownloadBlog({ blogId, title }) {
 
      try {
       // ✅ Fetch blog data
-      const res = await axios.get(`http://localhost:5000/api/blogs/${blogId}`);
+      const res = await axios.get(`https://inkspire-blogs-app1.onrender.com/api/blogs/${blogId}`);
       const blogData = res.data;
       setBlog(blogData);
 
@@ -30,7 +30,7 @@ function DownloadBlog({ blogId, title }) {
             <span style="margin-left: 20px;"><i class="fa fa-calendar" aria-hidden="true"></i> ${new Date(blogData.createdAt).toLocaleDateString()}</span>
             <span style="margin-left: 20px;"> ${blogData.category || "Uncategorized"}</span>
           </div>
-          ${blogData.image ? `<img src="http://localhost:5000${blogData.image}" style="width: 100%; max-height: 400px; object-fit: cover; border-radius: 8px; margin: 16px 0;" />` : ""}
+          ${blogData.image ? `<img src="https://inkspire-blogs-app1.onrender.com${blogData.image}" style="width: 100%; max-height: 400px; object-fit: cover; border-radius: 8px; margin: 16px 0;" />` : ""}
           <div style="font-size: 16px; line-height: 1.8; color: #333; white-space: pre-wrap;">
             ${blogData.content}
           </div>
