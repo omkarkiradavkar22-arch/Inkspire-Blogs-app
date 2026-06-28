@@ -9,7 +9,7 @@ function TrendingBlogs() {
   useEffect(() => {
     const fetchTrending = async () => {
       try {
-        const res = await axios.get("http://localhost:5000/api/blogs/trending");
+        const res = await axios.get("https://inkspire-blogs-app1.onrender.com/api/blogs/trending");
         setBlogs(res.data);
       } catch (error) {
         console.error("Trending error:", error);
