@@ -12,7 +12,7 @@ function FollowButton({ userId, onFollowChange }) {
         if (!token) return;
 
         const res = await axios.get(
-          `http://localhost:5000/api/follow/${userId}/check`,
+          `https://inkspire-blogs-app1.onrender.com/api/follow/${userId}/check`,
           { headers: { Authorization: `Bearer ${token}` } }
         );
         setIsFollowing(res.data.following);
@@ -36,7 +36,7 @@ function FollowButton({ userId, onFollowChange }) {
 
       setIsLoading(true);
       const res = await axios.post(
-        `http://localhost:5000/api/follow/${userId}/follow`,
+        `https://inkspire-blogs-app1.onrender.com/api/follow/${userId}/follow`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
