@@ -31,7 +31,7 @@ function BlogDetails() {
     const fetchBlog = async () => {
       try {
         setIsLoading(true);
-        const res = await axios.get(`http://localhost:5000/api/blogs/${id}`);
+        const res = await axios.get(`https://inkspire-blogs-app1.onrender.com/api/blogs/${id}`);
         setBlog(res.data);
         setLikes(res.data.likes?.length || 0);
         setSavedCount(res.data.savedCount || 0);
@@ -82,7 +82,7 @@ function BlogDetails() {
   const fetchComments = async () => {
     try {
       const res = await axios.get(
-        `http://localhost:5000/api/blogs/${id}/comments-with-replies`
+        `https://inkspire-blogs-app1.onrender.com/api/blogs/${id}/comments-with-replies`
       );
       setComments(res.data);
     } catch (error) {
@@ -98,11 +98,11 @@ function BlogDetails() {
         return;
       }
       await axios.put(
-        `http://localhost:5000/api/blogs/${id}/like`,
+        `https://inkspire-blogs-app1.onrender.com/api/blogs/${id}/like`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      const blogRes = await axios.get(`http://localhost:5000/api/blogs/${id}`);
+      const blogRes = await axios.get(`https://inkspire-blogs-app1.onrender.com/api/blogs/${id}`);
       setBlog(blogRes.data);
       setLikes(blogRes.data.likes?.length || 0);
     } catch (error) {
@@ -122,7 +122,7 @@ function BlogDetails() {
         return;
       }
       await axios.post(
-        `http://localhost:5000/api/blogs/${id}/comment`,
+        `https://inkspire-blogs-app1.onrender.com/api/blogs/${id}/comment`,
         { text: commentText },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -141,13 +141,13 @@ function BlogDetails() {
         return;
       }
       const res = await axios.post(
-        `http://localhost:5000/api/blogs/${id}/save`,
+        `https://inkspire-blogs-app1.onrender.com/api/blogs/${id}/save`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
       setIsSaved(!isSaved);
       setSavedCount((prev) => (isSaved ? prev - 1 : prev + 1));
-      const blogRes = await axios.get(`http://localhost:5000/api/blogs/${id}`);
+      const blogRes = await axios.get(`https://inkspire-blogs-app1.onrender.com/api/blogs/${id}`);
       setBlog(blogRes.data);
     } catch (error) {
       console.log(error);
@@ -158,7 +158,7 @@ function BlogDetails() {
     try {
       const token = localStorage.getItem("token");
       await axios.put(
-        `http://localhost:5000/api/blogs/comments/${commentId}`,
+        `https://inkspire-blogs-app1.onrender.com/api/blogs/comments/${commentId}`,
         { text: editText },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -177,7 +177,7 @@ function BlogDetails() {
     try {
       const token = localStorage.getItem("token");
       await axios.delete(
-        `http://localhost:5000/api/blogs/comments/${commentId}`,
+        `https://inkspire-blogs-app1.onrender.com/api/blogs/comments/${commentId}`,
         { headers: { Authorization: `Bearer ${token}` } }
       );
       fetchComments();
@@ -198,7 +198,7 @@ function BlogDetails() {
         return;
       }
       await axios.post(
-        `http://localhost:5000/api/blogs/comments/${commentId}/reply`,
+        `https://inkspire-blogs-app1.onrender.com/api/blogs/comments/${commentId}/reply`,
         { text: replyText },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -228,7 +228,7 @@ function BlogDetails() {
           return;
         }
         await axios.post(
-          `http://localhost:5000/api/blogs/comments/${reply._id}/reply`,
+          `https://inkspire-blogs-app1.onrender.com/api/blogs/comments/${reply._id}/reply`,
           { text: localReplyText },
           { headers: { Authorization: `Bearer ${token}` } }
         );
@@ -252,7 +252,7 @@ function BlogDetails() {
               <img
                 src={
                   reply.user?.profilePic
-                  ? `http://localhost:5000${reply.user.profilePic}`
+                  ? `https://inkspire-blogs-app1.onrender.com${reply.user.profilePic}`
                   : "https://ui-avatars.com/api/?name=User&background=6c6f8a&color=fff&size=36"
                 }
                 alt={reply.user?.username || "User"}
@@ -389,11 +389,11 @@ function BlogDetails() {
       <Helmet>
         <meta property="og:title" content={blog.title} />
         <meta property="og:description" content={blog.content?.substring(0, 150)} />
-        <meta property="og:image" content={blog.image ? `http://localhost:5000${blog.image}` : "https://your-domain.com/default.jpg"} />
-        <meta property="og:url" content={`http://localhost:5173/blog/${blog._id}`} />
+        <meta property="og:image" content={blog.image ? `https://inkspire-blogs-app1.onrender.com${blog.image}` : "https://your-domain.com/default.jpg"} />
+        <meta property="og:url" content={`inkspire-blogs-app.vercel.app/blog/${blog._id}`} />
         <meta name="twitter:title" content={blog.title} />
         <meta name="twitter:description" content={blog.content?.substring(0, 150)} />
-        <meta name="twitter:image" content={blog.image ? `http://localhost:5000${blog.image}` : "https://your-domain.com/default.jpg"} />
+        <meta name="twitter:image" content={blog.image ? `https://inkspire-blogs-app1.onrender.com${blog.image}` : "https://your-domain.com/default.jpg"} />
       </Helmet>
 
       <VideoBackground>
@@ -401,7 +401,7 @@ function BlogDetails() {
           <div className="blog-details-card">
             {blog.image && (
               <img
-                src={`http://localhost:5000${blog.image}`}
+                src={`https://inkspire-blogs-app1.onrender.com${blog.image}`}
                 alt={blog.title}
                 className="blog-details-image"
               />
@@ -416,7 +416,7 @@ function BlogDetails() {
                 <img
                   src={
                     blog.author?.profilePic
-                      ? `http://localhost:5000${blog.author.profilePic}`
+                      ? `https://inkspire-blogs-app1.onrender.com${blog.author.profilePic}`
                       : "https://ui-avatars.com/api/?name=User&background=4a6cf7&color=fff&size=50"
                   }
                   alt={blog.author?.username || "User"}
@@ -539,7 +539,7 @@ function BlogDetails() {
                             <img
                               src={
                                 c.user?.profilePic
-                                  ? `http://localhost:5000${c.user.profilePic}`
+                                  ? `https://inkspire-blogs-app1.onrender.com${c.user.profilePic}`
                                   : "https://ui-avatars.com/api/?name=User&background=6c6f8a&color=fff&size=36"
                               }
                               alt={c.user?.username || "User"}
