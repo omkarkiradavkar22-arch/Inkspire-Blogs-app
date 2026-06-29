@@ -390,7 +390,7 @@ function BlogDetails() {
         <meta property="og:title" content={blog.title} />
         <meta property="og:description" content={blog.content?.substring(0, 150)} />
         <meta property="og:image" content={blog.image ? `https://inkspire-blogs-app1.onrender.com${blog.image}` : "https://your-domain.com/default.jpg"} />
-        <meta property="og:url" content={`inkspire-blogs-app.vercel.app/blog/${blog._id}`} />
+        <meta property="og:url" content={`https://inkspire-blogs-app.vercel.app/${blog._id}`} />
         <meta name="twitter:title" content={blog.title} />
         <meta name="twitter:description" content={blog.content?.substring(0, 150)} />
         <meta name="twitter:image" content={blog.image ? `https://inkspire-blogs-app1.onrender.com${blog.image}` : "https://your-domain.com/default.jpg"} />
