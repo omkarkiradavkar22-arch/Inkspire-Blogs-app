@@ -32,14 +32,14 @@ function AuthorProfile() {
 
         //  Fetch Author Details
         const userRes = await axios.get(
-          `http://localhost:5000/api/users/${userId}`
+          `https://inkspire-blogs-app1.onrender.com/api/users/${userId}`
         );
         console.log("Author data:", userRes.data);
         setAuthor(userRes.data);
         
         //  Fetch Author's Blogs
         const blogsRes = await axios.get(
-          `http://localhost:5000/api/blogs/user/${userId}`
+          `https://inkspire-blogs-app1.onrender.com/api/blogs/user/${userId}`
         );
         console.log("Blogs data:", blogsRes.data);
         setBlogs(blogsRes.data);
@@ -140,7 +140,7 @@ const handleFollowChange = (isFollowing) => {
                 author.profilePic
                   ? author.profilePic.startsWith("http")
                     ? author.profilePic
-                    : `http://localhost:5000${author.profilePic}`
+                    : `https://inkspire-blogs-app1.onrender.com${author.profilePic}`
                     : "https://ui-avatars.com/api/?name=User&background=4a6cf7&color=fff&size=120"
                   }
               alt={author.username}
@@ -245,7 +245,7 @@ const handleFollowChange = (isFollowing) => {
                   {blog.image && (
                   <Link to={`/blog/${blog._id}`}>
                     <img
-                      src={`http://localhost:5000${blog.image}`}
+                      src={`https://inkspire-blogs-app1.onrender.com${blog.image}`}
                       alt={blog.title}
                       className="blog-image"
                       style={{ height: "150px" }}
