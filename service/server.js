@@ -1,3 +1,4 @@
+import fs from 'fs';
 import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
@@ -9,6 +10,7 @@ import path from "path";
 import notificationRoutes from "./routes/notificationRoutes.js";
 import { fileURLToPath } from "url";
 import followRoutes from "./routes/followRoutes.js";
+import Blog from "./models/Blog.js"; // Make sure to import your Blog model
 
 dotenv.config();
 
@@ -16,23 +18,76 @@ const app = express();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
-
+// Connect to database
 connectDB();
 
-app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+// ✅ CORS configuration - Place this BEFORE any routes
+app.use(cors({
+  origin: ['http://localhost:4173', 'http://localhost:3000', 'http://localhost:5173'],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  exposedHeaders: ['Content-Length', 'X-Foo', 'X-Bar'], // Add if needed
+  optionsSuccessStatus: 200 // For legacy browsers
+}));
+
+// ✅ Handle preflight requests
+
+
+// ✅ Serve static files with proper headers
+app.use("/uploads", (req, res, next) => {
+  // Add headers for static files
+  res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  next();
+}, express.static(path.join(__dirname, "uploads"), {
+  setHeaders: (res, path) => {
+    // Cache images for better performance
+    res.setHeader('Cache-Control', 'public, max-age=31536000');
+    res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+  }
+}));
+
+// Middleware
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
+
+// Routes
 app.use("/api/auth", authRoutes);
 app.use("/api/blogs", blogRoutes);
 app.use("/api/users", userRoutes);
-app.use("/uploads", express.static("uploads"));
 app.use("/api/notifications", notificationRoutes);
 app.use("/api/follow", followRoutes);
 
+// ✅ Add a route to serve blog images with proper CORS
+app.get("/api/images/:filename", async (req, res) => {
+  try {
+    const { filename } = req.params;
+    const imagePath = path.join(__dirname, "uploads", filename);
+    
+    // Check if file exists
+    if (!fs.existsSync(imagePath)) {
+      return res.status(404).json({ error: 'Image not found' });
+    }
+
+    // Set CORS headers
+    res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
+    res.header('Access-Control-Allow-Credentials', 'true');
+    
+    // Send the file
+    res.sendFile(imagePath);
+  } catch (error) {
+    console.error('Error serving image:', error);
+    res.status(500).json({ error: 'Error serving image' });
+  }
+});
+
+// Home route
 app.get("/", (req, res) => {
   res.send("Blog API Running...");
 });
+
+// Blog redirect route
 app.get("/blog/:id", async (req, res) => {
   try {
     const blog = await Blog.findById(req.params.id).populate("author", "username");
@@ -41,23 +96,23 @@ app.get("/blog/:id", async (req, res) => {
     }
 
     const imageUrl = blog.image 
-      ? `http://localhost:5000${blog.image}` 
+      ? `https://inkspire-blogs-app1.onrender.com${blog.image}` 
       : "https://your-default-image.com/default.jpg";
 
-    const html = `
+    const html = `     
       <!DOCTYPE html>
       <html>
       <head>
         <meta property="og:title" content="${blog.title}" />
         <meta property="og:description" content="${blog.content.substring(0, 150)}..." />
         <meta property="og:image" content="${imageUrl}" />
-        <meta property="og:url" content="http://localhost:5173/blog/${blog._id}" />
+        <meta property="og:url" content="https://inkspire-blogs-app.vercel.app/${blog._id}" />
         <meta property="og:type" content="article" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="${blog.title}" />
         <meta name="twitter:description" content="${blog.content.substring(0, 150)}..." />
         <meta name="twitter:image" content="${imageUrl}" />
-        <meta http-equiv="refresh" content="0;url=http://localhost:5173/blog/${blog._id}" />
+        <meta http-equiv="refresh" content="0;url=https://inkspire-blogs-app.vercel.app/${blog._id}" />
       </head>
       <body>
         <p>Redirecting to blog...</p>
