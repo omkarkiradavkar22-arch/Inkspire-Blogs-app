@@ -37,6 +37,29 @@ function Navbar() {
         Inkspire Blog<span>App</span>
       </Link>
 
+      <div className="mobile-auth-actions">
+
+  {token ? (
+    <button
+      className="mobile-auth-btn logout"
+      onClick={handleLogout}
+    >
+      <i className="fa fa-sign-out"></i>
+    </button>
+  ) : (
+    <>
+      <Link to="/login" className="mobile-auth-btn">
+        Login
+      </Link>
+
+      <Link to="/register" className="mobile-auth-btn">
+        Register
+      </Link>
+    </>
+  )}
+
+</div>
+
       <button className="navbar-hamburger" onClick={toggleMenu}>
         {isMenuOpen ? "✕" : "☰"}
       </button>
@@ -147,126 +170,3 @@ function Navbar() {
 }
 
 export default Navbar;
-
-
-//   return (
-//     <nav className="neo-navbar">
-//       {/* ✅ Logo + Hamburger - Left Side */}
-//       <div className="navbar-left">
-//         <Link to="/" className="navbar-brand" onClick={closeMenu}>
-//           Blog<span>App</span>
-//         </Link>
-//         <button className="navbar-hamburger" onClick={toggleMenu}>
-//           {isMenuOpen ? "✕" : "☰"}
-//         </button>
-//       </div>
-
-//       {/* ✅ Navbar Links - Right Side */}
-//       <div className={`navbar-links ${isMenuOpen ? "open" : ""}`}>
-//         {/* Home */}
-//         <Link
-//           to="/"
-//           className={`neo-nav-link ${isActive("/") ? "active" : ""}`}
-//           onClick={closeMenu}
-//         >
-//           <i className="fa fa-home" aria-hidden="true"></i> Home
-//         </Link>
-
-//         {/* Dark Mode Toggle */}
-//         <button
-//           className="neo-nav-link"
-//           onClick={toggleTheme}
-//           style={{
-//             background: darkMode ? "rgba(58, 58, 58, 0.5)" : "",
-//           }}
-//         >
-//           {darkMode ? (
-//             <>
-//               <i className="fa fa-sun-o" aria-hidden="true"></i> Light
-//             </>
-//           ) : (
-//             <>
-//               <i className="fa fa-moon-o" aria-hidden="true"></i> Dark
-//             </>
-//           )}
-//         </button>
-
-//         {token ? (
-//           // ✅ Logged In Links
-//           <>
-//             <Link
-//               to="/create"
-//               className={`neo-nav-link ${isActive("/create") ? "active" : ""}`}
-//               onClick={closeMenu}
-//             >
-//               <i className="fa fa-pencil-square-o" aria-hidden="true"></i> Create Blog
-//             </Link>
-
-//             <Link
-//               to="/myblogs"
-//               className={`neo-nav-link ${isActive("/myblogs") ? "active" : ""}`}
-//               onClick={closeMenu}
-//             >
-//               <i className="fa fa-book" aria-hidden="true"></i> My Blogs
-//             </Link>
-
-//             <Link
-//               to="/saved-blogs"
-//               className={`neo-nav-link ${isActive("/saved-blogs") ? "active" : ""}`}
-//               onClick={closeMenu}
-//             >
-//               <i className="fa fa-bookmark" aria-hidden="true"></i> Saved
-//             </Link>
-
-//             <Link
-//               to="/profile"
-//               className={`neo-nav-link ${isActive("/profile") ? "active" : ""}`}
-//               onClick={closeMenu}
-//             >
-//               <i className="fa fa-user" aria-hidden="true"></i> Profile
-//             </Link>
-
-//             {/* ✅ Notification Bell - इथे add करा */}
-//             <NotificationBell />
-
-//             <button
-//               onClick={handleLogout}
-//               className="neo-nav-link logout"
-//             >
-//               <i className="fa fa-sign-out" aria-hidden="true"></i> Logout
-//             </button>
-//           </>
-//         ) : (
-//           // ✅ Logged Out Links
-//           <>
-//             <Link
-//               to="/login"
-//               className={`neo-nav-link ${isActive("/login") ? "active" : ""}`}
-//               onClick={closeMenu}
-//             >
-//               <i className="fa fa-sign-in" aria-hidden="true"></i> Login
-//             </Link>
-
-//             <Link
-//               to="/register"
-//               className={`neo-nav-link ${isActive("/register") ? "active" : ""}`}
-//               onClick={closeMenu}
-//             >
-//               <i className="fa fa-user-plus" aria-hidden="true"></i> Register
-//             </Link>
-
-//             <Link
-//               to="/profile"
-//               className={`neo-nav-link ${isActive("/profile") ? "active" : ""}`}
-//               onClick={closeMenu}
-//             >
-//               <i className="fa fa-user" aria-hidden="true"></i> Profile
-//             </Link>
-//           </>
-//         )}
-//       </div>
-//     </nav>
-//   );
-// }
-
-// export default Navbar;
