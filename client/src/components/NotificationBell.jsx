@@ -3,8 +3,9 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import "../styles/neomorphism.css";
 
-function NotificationBell() {
+function NotificationBell({ pageMode = false }) {
   const navigate = useNavigate();
+ 
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
@@ -31,7 +32,7 @@ function NotificationBell() {
       const token = localStorage.getItem("token");
       if (!token) return;
 
-      const res = await axios.get("http://localhost:5000/api/notifications", {
+      const res = await axios.get("https://inkspire-blogs-app1.onrender.com/api/notifications", {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -47,7 +48,7 @@ function NotificationBell() {
     try {
       const token = localStorage.getItem("token");
       await axios.put(
-        `http://localhost:5000/api/notifications/${id}/read`,
+        `https://inkspire-blogs-app1.onrender.com/api/notifications/${id}/read`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -62,7 +63,7 @@ function NotificationBell() {
     try {
       const token = localStorage.getItem("token");
       await axios.put(
-        "http://localhost:5000/api/notifications/read-all",
+        "https://inkspire-blogs-app1.onrender.com/api/notifications/read-all",
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -115,15 +116,32 @@ function NotificationBell() {
   };
 
   return (
-    <div className="notification-wrapper" ref={dropdownRef}>
-      <button className="neo-nav-link" onClick={() => setIsOpen(!isOpen)}>
-        <i className="fa fa-bell" aria-hidden="true"></i>
-        {unreadCount > 0 && (
-          <span className="notification-badge">{unreadCount}</span>
-        )}
-      </button>
+    <div
+  className={pageMode ? "" : "notification-wrapper"}
+  ref={dropdownRef}
+>
+      {!pageMode && (
+        <button
+          className="neo-nav-link"
+          onClick={() => {
+            if (window.innerWidth <= 768) {
+              navigate("/notifications");
+            } else {
+              setIsOpen(!isOpen);
+            }
+          }}
+        >
+          <i className="fa fa-bell"></i>
 
-      {isOpen && (
+          {unreadCount > 0 && (
+            <span className="notification-badge">
+              {unreadCount}
+            </span>
+          )}
+        </button>
+      )}
+
+      {(pageMode || isOpen) && (
         <div className="notification-dropdown">
           <div className="notification-header">
             <span>Notifications</span>
@@ -152,7 +170,7 @@ function NotificationBell() {
                     <img
                       src={
                         notif.sender?.profilePic
-                          ? `http://localhost:5000${notif.sender.profilePic}`
+                          ? `https://inkspire-blogs-app1.onrender.com${notif.sender.profilePic}`
                           : "https://ui-avatars.com/api/?name=User&background=4a6cf7&color=fff&size=40"
                       }
                       alt={notif.sender?.username}
