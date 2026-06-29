@@ -2,58 +2,126 @@ import { useState } from "react";
 import html2pdf from "html2pdf.js";
 import axios from "axios";
 
-
 function DownloadBlog({ blogId, title }) {  
   const [isDownloading, setIsDownloading] = useState(false);
-    const [blog, setBlog] = useState(null);
+  const [blog, setBlog] = useState(null);
+
+  // Function to fetch image as base64 (fallback if CORS still fails)
+  const fetchImageAsBase64 = async (imagePath) => {
+    try {
+      // Try different URL formats
+      const urls = [
+        `https://inkspire-blogs-app1.onrender.com${imagePath}`,  // Original path
+        `https://inkspire-blogs-app1.onrender.com/api/images/${imagePath.split('/').pop()}`, // API endpoint
+        imagePath // Relative path
+      ];
+      
+      for (const url of urls) {
+        try {
+          const response = await fetch(url, {
+            credentials: 'include',
+            headers: {
+              'Accept': 'image/*'
+            }
+          });
+          
+          if (response.ok) {
+            const blob = await response.blob();
+            return await new Promise((resolve) => {
+              const reader = new FileReader();
+              reader.onloadend = () => resolve(reader.result);
+              reader.readAsDataURL(blob);
+            });
+          }
+        } catch (e) {
+          console.warn(`Failed to fetch from ${url}:`, e);
+          continue;
+        }
+      }
+      return null;
+    } catch (error) {
+      console.error('Error loading image:', error);
+      return null;
+    }
+  };
 
   const handleDownload = async () => {
     if (!blogId) return;
 
     setIsDownloading(true);
 
-     try {
-      // ✅ Fetch blog data
+    try {
+      // Fetch blog data
       const res = await axios.get(`https://inkspire-blogs-app1.onrender.com/api/blogs/${blogId}`);
       const blogData = res.data;
       setBlog(blogData);
 
-    //  Create PDF content
+      let imageBase64 = null;
+      
+      // If blog has image, try to load it
+      if (blogData.image) {
+        imageBase64 = await fetchImageAsBase64(blogData.image);
+        
+        // If base64 loading failed, try direct URL with CORS
+        if (!imageBase64) {
+          console.warn('Could not load image as base64, trying direct URL');
+        }
+      }
 
-    const content = `
-        <div style="padding: 40px; font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto;">
-          <h1 style="color: #1a1a2e; font-size: 28px; border-bottom: 2px solid #4a6cf7; padding-bottom: 12px;">
-            ${blogData.title}
-          </h1>
-          <div style="color: #666; font-size: 14px; margin: 12px 0;">
-            <span><i class="fa fa-user-circle" aria-hidden="true"></i> ${blogData.author?.username || "Unknown"}</span>
-            <span style="margin-left: 20px;"><i class="fa fa-calendar" aria-hidden="true"></i> ${new Date(blogData.createdAt).toLocaleDateString()}</span>
-            <span style="margin-left: 20px;"> ${blogData.category || "Uncategorized"}</span>
-          </div>
-          ${blogData.image ? `<img src="https://inkspire-blogs-app1.onrender.com${blogData.image}" style="width: 100%; max-height: 400px; object-fit: cover; border-radius: 8px; margin: 16px 0;" />` : ""}
-          <div style="font-size: 16px; line-height: 1.8; color: #333; white-space: pre-wrap;">
-            ${blogData.content}
-          </div>
-          <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd; text-align: center; color: #999; font-size: 12px;">
-            Downloaded from BlogApp • ${new Date().toLocaleDateString()}
-          </div>
-        </div>
+      // Create PDF content
+      const content = `
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          </head>
+          <body>
+            <div style="padding: 40px; font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto;">
+              <h1 style="color: #1a1a2e; font-size: 28px; border-bottom: 2px solid #4a6cf7; padding-bottom: 12px;">
+                ${blogData.title}
+              </h1>
+              <div style="color: #666; font-size: 14px; margin: 12px 0;">
+                <span><i class="fa fa-user-circle" aria-hidden="true"></i> ${blogData.author?.username || "Unknown"}</span>
+                <span style="margin-left: 20px;"><i class="fa fa-calendar" aria-hidden="true"></i> ${new Date(blogData.createdAt).toLocaleDateString()}</span>
+                <span style="margin-left: 20px;"> ${blogData.category || "Uncategorized"}</span>
+              </div>
+              ${imageBase64 ? 
+                `<img src="${imageBase64}" style="width: 100%; max-height: 400px; object-fit: cover; border-radius: 8px; margin: 16px 0;" />` : 
+                (blogData.image ? 
+                  `<div style="background: #f0f0f0; padding: 20px; text-align: center; color: #999; border-radius: 8px; margin: 16px 0;">
+                    Image not available in PDF
+                  </div>` : 
+                  '')}
+              <div style="font-size: 16px; line-height: 1.8; color: #333; white-space: pre-wrap;">
+                ${blogData.content}
+              </div>
+              <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd; text-align: center; color: #999; font-size: 12px;">
+                Downloaded from InkspireBlogApp • ${new Date().toLocaleDateString()}
+              </div>
+            </div>
+          </body>
+        </html>
       `;
 
-
-
-    const opt = {
+      const opt = {
         margin: 10,
         filename: `${blogData.title || "blog"}.pdf`,
         image: { type: "jpeg", quality: 0.98 },
-        html2canvas: { scale: 2, useCORS: true },
+        html2canvas: { 
+          scale: 2, 
+          useCORS: true,
+          logging: true,
+          allowTaint: true,
+          proxy: 'https://inkspire-blogs-app1.onrender.com'
+        },
         jsPDF: { unit: "mm", format: "a4", orientation: "portrait" },
       };
 
-    await html2pdf().set(opt).from(content).save();
+      await html2pdf().set(opt).from(content).save();
     } catch (error) {
       console.error("Download error:", error);
-      alert("Failed to download PDF");
+      alert(`Failed to download PDF: ${error.message}`);
     } finally {
       setIsDownloading(false);
     }
@@ -65,7 +133,6 @@ function DownloadBlog({ blogId, title }) {
       onClick={handleDownload}
       disabled={isDownloading}
       aria-label="Download PDF"
-
       style={{
         display: "inline-flex",
         alignItems: "center",
@@ -75,7 +142,7 @@ function DownloadBlog({ blogId, title }) {
       {isDownloading ? (
         <>
           <span className="spinner" style={{ width: "18px", height: "18px" }}></span>
-          <i class="fa fa-refresh" aria-hidden="true"></i>
+          <i className="fa fa-refresh" aria-hidden="true"></i>
         </>
       ) : (
         <>
