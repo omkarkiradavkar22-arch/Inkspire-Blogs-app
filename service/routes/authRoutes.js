@@ -1,166 +1,132 @@
+import fs from 'fs';
 import express from "express";
-import authMiddleware from "../middleware/authMiddleware.js";
-// import {
-//   registerUser,
-//   loginUser,
-// } from "../controllers/authController.js";
+import dotenv from "dotenv";
+import cors from "cors";
+import connectDB from "./config/db.js";
+import authRoutes from "./routes/authRoutes.js";
+import blogRoutes from "./routes/blogRoutes.js";
+import userRoutes from "./routes/userRoutes.js";
+import path from "path";
+import notificationRoutes from "./routes/notificationRoutes.js";
+import { fileURLToPath } from "url";
+import followRoutes from "./routes/followRoutes.js";
+import Blog from "./models/Blog.js"; // Make sure to import your Blog model
+
+dotenv.config();
+
+const app = express();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Connect to database
+connectDB();
+
+// ✅ CORS configuration - Place this BEFORE any routes
+app.use(cors({
+  origin: ['http://localhost:4173', 'http://localhost:3000', 'http://localhost:5173'],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  exposedHeaders: ['Content-Length', 'X-Foo', 'X-Bar'], // Add if needed
+  optionsSuccessStatus: 200 // For legacy browsers
+}));
+
+// ✅ Handle preflight requests
 
 
-import User from "../models/User.js";
-import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
-import nodemailer from "nodemailer";
-import crypto from "crypto";
+// ✅ Serve static files with proper headers
+app.use("/uploads", (req, res, next) => {
+  // Add headers for static files
+  res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
+  res.header('Access-Control-Allow-Credentials', 'true');
+  next();
+}, express.static(path.join(__dirname, "uploads"), {
+  setHeaders: (res, path) => {
+    // Cache images for better performance
+    res.setHeader('Cache-Control', 'public, max-age=31536000');
+    res.setHeader('Cross-Origin-Resource-Policy', 'cross-origin');
+  }
+}));
 
+// Middleware
+app.use(express.json({ limit: '50mb' }));
+app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
-const router = express.Router();
+// Routes
+app.use("/api/auth", authRoutes);
+app.use("/api/blogs", blogRoutes);
+app.use("/api/users", userRoutes);
+app.use("/api/notifications", notificationRoutes);
+app.use("/api/follow", followRoutes);
 
-
-router.post("/forgot-password", async (req, res) => {
+// ✅ Add a route to serve blog images with proper CORS
+app.get("/api/images/:filename", async (req, res) => {
   try {
-    const { email } = req.body;
-    const user = await User.findOne({ email });
-
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
-
-    const resetToken = crypto.randomBytes(32).toString("hex");
+    const { filename } = req.params;
+    const imagePath = path.join(__dirname, "uploads", filename);
     
-    user.resetToken = resetToken;
-    user.resetTokenExpiry = Date.now() + 3600000; // 1 hour
-    await user.save();
+    // Check if file exists
+    if (!fs.existsSync(imagePath)) {
+      return res.status(404).json({ error: 'Image not found' });
+    }
 
-    const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-  
-  tls: {
-    rejectUnauthorized: false
-  }
-});
-
-    const resetLink = `http://localhost:5173/reset-password/${resetToken}`;
-
-    await transporter.sendMail({
-      from: process.env.EMAIL_USER,
-      to: user.email,
-      subject: "Password Reset Request",
-      html: `
-        <h1>Password Reset</h1>
-        <p>Click the link below to reset your password:</p>
-        <a href="${resetLink}">${resetLink}</a>
-        <p>This link will expire in 1 hour.</p>
-        <p>If you didn't request this, ignore this email.</p>
-      `,
-    });
-
-     res.json({ message: "Password reset link sent to your email" });
+    // Set CORS headers
+    res.header('Access-Control-Allow-Origin', req.headers.origin || '*');
+    res.header('Access-Control-Allow-Credentials', 'true');
+    
+    // Send the file
+    res.sendFile(imagePath);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server error" });
+    console.error('Error serving image:', error);
+    res.status(500).json({ error: 'Error serving image' });
   }
 });
 
-router.post("/reset-password/:token", async (req, res) => {
+// Home route
+app.get("/", (req, res) => {
+  res.send("Blog API Running...");
+});
+
+// Blog redirect route
+app.get("/blog/:id", async (req, res) => {
   try {
-    const { token } = req.params;
-    const { password } = req.body;
-
-    const user = await User.findOne({
-      resetToken: token,
-      resetTokenExpiry: { $gt: Date.now() }, 
-    });
-
-    if (!user) {
-      return res.status(400).json({ message: "Invalid or expired token" });
+    const blog = await Blog.findById(req.params.id).populate("author", "username");
+    if (!blog) {
+      return res.status(404).send("Blog not found");
     }
 
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
+    const imageUrl = blog.image 
+      ? `https://inkspire-blogs-app1.onrender.com${blog.image}` 
+      : "https://your-default-image.com/default.jpg";
 
-    user.password = hashedPassword;
-    user.resetToken = null;
-    user.resetTokenExpiry = null;
-    await user.save();
-
-    res.json({ message: "Password reset successfully" });
+    const html = `     
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta property="og:title" content="${blog.title}" />
+        <meta property="og:description" content="${blog.content.substring(0, 150)}..." />
+        <meta property="og:image" content="${imageUrl}" />
+        <meta property="og:url" content="https://inkspire-blogs-app.vercel.app/${blog._id}" />
+        <meta property="og:type" content="article" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content="${blog.title}" />
+        <meta name="twitter:description" content="${blog.content.substring(0, 150)}..." />
+        <meta name="twitter:image" content="${imageUrl}" />
+        <meta http-equiv="refresh" content="0;url=https://inkspire-blogs-app.vercel.app/${blog._id}" />
+      </head>
+      <body>
+        <p>Redirecting to blog...</p>
+      </body>
+      </html>
+    `;
+    res.send(html);
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server error" });
-  }
-});
-router.post("/login", async (req, res) => {
-  try {
-    const { email, password } = req.body;
-    const user = await User.findOne({ email });
-
-    if (!user) {
-      return res.status(400).json({ message: "Invalid credentials" });
-    }
-
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      return res.status(400).json({ message: "Invalid credentials" });
-    }
-
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: "7d",
-    });
-
-    res.json({
-      token,
-      user: { id: user._id,_id: user._id, username: user.username, email: user.email },
-    });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
+    res.status(500).send("Error");
   }
 });
 
-router.post("/register", async (req, res) => {
-  try {
-    const { username, email, password } = req.body;
+const PORT = process.env.PORT || 5000;
 
-    const existingUser = await User.findOne({ email });
-    if (existingUser) {
-      return res.status(400).json({ message: "User already exists" });
-    }
-
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
-
-    const user = new User({
-      username,
-      email,
-      password: hashedPassword,
-    });
-
-    await user.save();
-
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: "7d",
-    });
-
-    res.status(201).json({
-      token,
-      user: { id: user._id, username: user.username, email: user.email },
-    });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });
-
-// router.post("/register", registerUser);
-// router.post("/login", loginUser);
-router.get(
-  "/me",
-  authMiddleware,
-  (req, res) => {
-    res.json(req.user);
-  }
-);
-
-export default router;
