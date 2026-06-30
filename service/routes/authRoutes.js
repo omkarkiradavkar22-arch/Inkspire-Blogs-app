@@ -43,7 +43,7 @@ router.post("/forgot-password", async (req, res) => {
   }
 });
 
-    const resetLink = `http://localhost:4173/${resetToken}`;
+    const resetLink = `inkspire-blogs-app.vercel.app/${resetToken}`;
 
     await transporter.sendMail({
       from: process.env.EMAIL_USER,
