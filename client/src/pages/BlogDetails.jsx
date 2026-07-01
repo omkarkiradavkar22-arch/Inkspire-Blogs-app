@@ -413,7 +413,7 @@ function BlogDetails() {
           <div className="blog-details-card">
             {blog.image && (
               <img
-                src={`https://inkspire-blogs-app1.onrender.com${blog.image}`}
+                src={blog.image}
                 alt={blog.title}
                 className="blog-details-image"
               />
@@ -427,9 +427,8 @@ function BlogDetails() {
               <div className="blog-author">
                 <img
                   src={
-                    blog.author?.profilePic
-                      ? `https://inkspire-blogs-app1.onrender.com${blog.author.profilePic}`
-                      : "https://ui-avatars.com/api/?name=User&background=4a6cf7&color=fff&size=50"
+                    blog.author?.profilePic ||
+                     "https://ui-avatars.com/api/?name=User&background=4a6cf7&color=fff&size=50"
                   }
                   alt={blog.author?.username || "User"}
                   className="blog-author-avatar"
@@ -550,9 +549,8 @@ function BlogDetails() {
                           <div className="comment-user">
                             <img
                               src={
-                                c.user?.profilePic
-                                  ? `https://inkspire-blogs-app1.onrender.com${c.user.profilePic}`
-                                  : "https://ui-avatars.com/api/?name=User&background=6c6f8a&color=fff&size=36"
+                                c.user?.profilePic ||
+                                   "https://ui-avatars.com/api/?name=User&background=6c6f8a&color=fff&size=36"
                               }
                               alt={c.user?.username || "User"}
                               className="comment-avatar"
