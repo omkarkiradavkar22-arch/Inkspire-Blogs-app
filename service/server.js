@@ -24,7 +24,7 @@ app.use(cors({
   origin: ["http://localhost:4173",
     "http://localhost:4174",
     "http://localhost:5173",
-    "inkspire-blogs-app.vercel.app"],
+    "https://inkspire-blogs-app.vercel.app"],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
@@ -97,13 +97,13 @@ app.get("/blog/:id", async (req, res) => {
         <meta property="og:title" content="${blog.title}" />
         <meta property="og:description" content="${blog.content.substring(0, 150)}..." />
         <meta property="og:image" content="${imageUrl}" />
-        <meta property="og:url" content="inkspire-blogs-app.vercel.app/blog/${blog._id}" />
+        <meta property="og:url" content="https://inkspire-blogs-app.vercel.app/blog/${blog._id}" />
         <meta property="og:type" content="article" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:title" content="${blog.title}" />
         <meta name="twitter:description" content="${blog.content.substring(0, 150)}..." />
         <meta name="twitter:image" content="${imageUrl}" />
-        <meta http-equiv="refresh" content="0;url=inkspire-blogs-app.vercel.app/blog/${blog._id}" />
+        <meta http-equiv="refresh" content="0;url=https://inkspire-blogs-app.vercel.app/blog/${blog._id}" />
       </head>
       <body>
         <p>Redirecting to blog...</p>
