@@ -32,7 +32,9 @@ router.post("/forgot-password", async (req, res) => {
     await user.save();
 
     const transporter = nodemailer.createTransport({
-  service: "gmail",
+   host: "smtp.gmail.com",
+  port: 587,
+  secure: false, // 587 = false
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
