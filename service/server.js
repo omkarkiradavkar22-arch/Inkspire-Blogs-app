@@ -81,72 +81,88 @@ app.get("/", (req, res) => {
 });
 app.get("/blog/:id", async (req, res) => {
   try {
-    const blog = await Blog.findById(req.params.id).populate("author", "username");
+    const blog = await Blog.findById(req.params.id).populate(
+      "author",
+      "username"
+    );
+
     if (!blog) {
       return res.status(404).send("Blog not found");
     }
 
     const imageUrl = blog.image
-  ? blog.image.startsWith("http")
-    ? blog.image
-    : `https://inkspire-blogs-app1.onrender.com${blog.image}`
-  : "https://inkspire-blogs-app1.onrender.com/uploads/default.png";
+      ? blog.image.startsWith("http")
+        ? blog.image
+        : `https://inkspire-blogs-app1.onrender.com${blog.image}`
+      : "https://inkspire-blogs-app1.onrender.com/uploads/default.png";
 
+    // Detect social media bots
+    const userAgent = (req.headers["user-agent"] || "").toLowerCase();
+
+    const isBot =
+      userAgent.includes("facebookexternalhit") ||
+      userAgent.includes("whatsapp") ||
+      userAgent.includes("twitterbot") ||
+      userAgent.includes("linkedinbot") ||
+      userAgent.includes("telegrambot") ||
+      userAgent.includes("discordbot") ||
+      userAgent.includes("slackbot");
+
+    // Normal users → redirect to frontend
+    if (!isBot) {
+      return res.redirect(
+        `https://inkspire-blogs-app.vercel.app/blog/${blog._id}`
+      );
+    }
+
+    // Bots → return HTML with OG tags
     const html = `
-        <!DOCTYPE html>
-        <html lang="en">
-        <head>
-          <meta charset="UTF-8" />
-          <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 
-          <title>${blog.title}</title>
-          <meta name="description" content="${blog.content.substring(0, 150)}..." />
+<title>${blog.title}</title>
 
-          <meta property="og:title" content="${blog.title}" />
-          <meta property="og:description" content="${blog.content.substring(0, 150)}..." />
-          <meta property="og:image" content="${imageUrl}" />
-          <meta property="og:image:secure_url" content="${imageUrl}" />
-          <meta property="og:image:width" content="1200" />
-          <meta property="og:image:height" content="630" />
-          <meta property="og:image:type" content="image/jpeg" />
-          <meta property="og:site_name" content="Inkspire" />
-          <meta property="og:locale" content="en_US" />
-          <meta property="og:url" content="https://inkspire-blogs-app.vercel.app/blog/${blog._id}" />
-          <meta property="og:type" content="article" />
+<meta name="description" content="${blog.content.substring(0,150)}..." />
 
-          <meta name="twitter:card" content="summary_large_image" />
-          <meta name="twitter:title" content="${blog.title}" />
-          <meta name="twitter:description" content="${blog.content.substring(0, 150)}..." />
-          <meta name="twitter:image" content="${imageUrl}" />
-          <meta name="twitter:image:alt" content="${blog.title}" />
+<meta property="og:title" content="${blog.title}" />
+<meta property="og:description" content="${blog.content.substring(0,150)}..." />
+<meta property="og:image" content="${imageUrl}" />
+<meta property="og:image:secure_url" content="${imageUrl}" />
+<meta property="og:site_name" content="Inkspire" />
+<meta property="og:locale" content="en_US" />
+<meta property="og:url" content="https://inkspire-blogs-app.vercel.app/blog/${blog._id}" />
+<meta property="og:type" content="article" />
 
-          <meta http-equiv="refresh" content="2;url=https://inkspire-blogs-app.vercel.app/blog/${blog._id}" />
-        </head>
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="${blog.title}" />
+<meta name="twitter:description" content="${blog.content.substring(0,150)}..." />
+<meta name="twitter:image" content="${imageUrl}" />
+<meta name="twitter:image:alt" content="${blog.title}" />
 
-        <body>
-          <h2>${blog.title}</h2>
+</head>
 
-          <img
-            src="${imageUrl}"
-            alt="${blog.title}"
-            style="max-width:100%;height:auto;border-radius:10px;"
-          />
+<body>
 
-          <p>${blog.content.substring(0, 150)}...</p>
+<h2>${blog.title}</h2>
 
-          <p>Redirecting to blog...</p>
+<img
+src="${imageUrl}"
+alt="${blog.title}"
+style="max-width:100%;height:auto;border-radius:10px;"
+/>
 
-          <script>
-            setTimeout(() => {
-              window.location.href =
-                "https://inkspire-blogs-app.vercel.app/blog/${blog._id}";
-            }, 2000);
-          </script>
-        </body>
-        </html>
-        `;
+<p>${blog.content.substring(0,150)}...</p>
+
+</body>
+</html>
+`;
+
     res.send(html);
   } catch (error) {
+    console.error(error);
     res.status(500).send("Error");
   }
 });
